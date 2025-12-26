@@ -1,0 +1,29 @@
+name: psn-ibs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core Python
+  - python>=3.10
+
+  # Jupyter environment
+  - jupyterlab
+  - ipykernel
+
+  # Data handling
+  - numpy
+  - pandas
+
+  # Visualization
+  - matplotlib
+  - seaborn
+
+  # Network analysis
+  - networkx
+  - python-louvain  # community detection (community.community_louvain)
+
+  # Machine learning & statistics
+  - scikit-learn
+  - scipy
+  - statsmodels  # for FDR correction (multipletests)
+

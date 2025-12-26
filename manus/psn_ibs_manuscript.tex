@@ -1,0 +1,739 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% MDPI LaTeX Template for Diagnostics
+%% Patient Similarity Networks for IBS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[diagnostics,article,submit,moreauthors,pdftex]{Definitions/mdpi}
+
+% Packages
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{siunitx}
+
+%=================================================================
+% MDPI Publication Metadata (required for compilation)
+%=================================================================
+\pubvolume{15}
+\issuenum{1}
+\articlenumber{000}
+\pubyear{2025}
+\copyrightyear{2025}
+\datereceived{}
+\daterevised{}
+\dateaccepted{}
+\datepublished{}
+\hreflink{https://doi.org/}
+
+%=================================================================
+% Full title of the paper
+\Title{Patient Similarity Networks for Irritable Bowel Syndrome: Revisiting Brain Morphometry and Cognitive Features}
+
+% MDPI internal command: Title for citation
+\TitleCitation{Patient Similarity Networks for IBS}
+
+% Author ORCID (optional)
+\def\orcidauthorA{0000-0002-0032-4182} % Arvid Lundervold
+\def\orcidauthorB{0009-0000-6614-585X} % Julie Billing
+\def\orcidauthorC{0000-0003-3574-7078} % Birgitte Berentsen
+\def\orcidauthorD{0000-0002-6819-6164} % Astri J. Lundervold
+
+% Authors
+\Author{Arvid Lundervold $^{1,2,*}$\orcidA{}, Julie Billing $^{3}$\orcidB{}, Birgitte Berentsen $^{4,5}$\orcidC{} and Astri J. Lundervold $^{3}$\orcidD{}}
+
+% Affiliations
+\address{%
+$^{1}$ \quad Department of Biomedicine, University of Bergen, N-5009 Bergen, Norway; \\
+$^{2}$ \quad Mohn Medical Imaging and Visualization Centre (MMIV), Department of Radiology, Haukeland University Hospital, N-5021 Bergen, Norway; \\
+$^{3}$ \quad Department of Biological and Medical Psychology, University of Bergen, N-5020 Bergen, Norway;\\
+$^{4}$ \quad Department of Clinical Medicine, University of Bergen, Bergen 5021, Norway\\
+$^{5}$ \quad National Center for Functional Gastrointestinal Disorders, Department of Medicine, Haukeland University Hospital, Bergen 5021, Norway}
+
+% Contact information of the corresponding author
+\corres{Correspondence: arvid.lundervold@uib.no}
+
+% Current address and/or shared authorship
+%\firstnote{Current address: Address} 
+%\secondnote{These authors contributed equally to this work.}
+
+% Simple summary for non-specialist readers (required for some journals)
+%\simplesumm{}
+
+% Abstract (single paragraph, 200 words max for Diagnostics)
+\abstract{%
+\textbf{Background:} Irritable Bowel Syndrome (IBS) is a heterogeneous gastrointestinal disorder characterized by complex brain-gut interactions. Patient Similarity Networks (PSN) offer a novel approach for exploring this heterogeneity and identifying clinically relevant patient subgroups.
+\textbf{Methods:} We analyzed data from 78 participants (49 IBS patients and 29 healthy controls) with 36 brain morphometric measures (FreeSurfer v7.4.1) and six measures of cognitive functions (five RBANS domain indices plus a Total Scale score). PSN were constructed using multiple similarity measures (Euclidean, cosine, correlation-based) with Gaussian kernel transformation. We performed community detection (Louvain algorithm), centrality analyses, feature importance analysis, and correlations with symptom severity. Statistical validation included bootstrap confidence intervals and permutation testing.
+\textbf{Results:} The PSN comprised 78 nodes connected by 469 edges, with four communities detected. These communities did not significantly correspond to diagnostic groups (Adjusted Rand Index = 0.011, permutation $p = 0.212$), indicating IBS patients and healthy controls were intermixed. However, each community exhibited distinct neurobiological profiles: Community 1 (oldest, preserved cognition) showed elevated intracranial volume but reduced subcortical gray matter; Community 2 (youngest, most severe IBS symptoms) had elevated cortical volumes but reduced white matter; Community 3 (most balanced IBS/HC ratio, mildest IBS symptoms) showed the largest subcortical volumes; Community 4 (lowest cognitive performance across multiple domains) displayed the lowest RBANS scores alongside high IBS prevalence. Top network features included subcortical structures, corpus callosum, and cognitive indices (Language, Attention).
+\textbf{Conclusions:} PSN identifies brain-cognition subgroups that cut across diagnostic categories, with distinct feature profiles suggesting different neurobiological phenotypes within IBS that may inform personalized treatment strategies.
+}
+
+% Keywords
+\keyword{irritable bowel syndrome; patient similarity networks; brain morphometry; cognition; RBANS; FreeSurfer; community detection; network analysis; gut-brain axis}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Main Document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+
+Irritable Bowel Syndrome (IBS) is one of the most prevalent disorders of gut-brain interaction, affecting 4--10\% of the global population depending on diagnostic criteria~\cite{Sperber2021}. 
+The syndrome is characterized by recurrent abdominal pain associated with defecation, accompanied by alterations in bowel habits~\cite{Lacy2016}. 
+The clinical presentation is heterogeneous, with symptoms ranging from mild discomfort to severe complaints that substantially impair quality of life and daily functioning~\cite{Enck2016,ElSalhy2025}.
+
+IBS is now recognized as a gut-brain disorder, where bidirectional interactions between gastrointestinal symptoms and psychological function play a central role~\cite{Mayer2022}. 
+In their seminal work proposing a systems view of IBS, Mayer et al.~\cite{MayerSystems2015} outlined how the disorder emerges from dysregulated interactions among brain, gut, and microbiome, emphasizing the need for integrative analytical approaches that capture this complexity. 
+While GI symptoms can trigger or exacerbate psychological distress, anxiety and depression can in turn worsen the frequency and intensity of abdominal pain~\cite{VanOudenhove2016}. 
+Recent research has expanded this psychobiological framework to include cognitive function, revealing a more nuanced picture of brain-gut interactions in IBS~\cite{Kennedy2014,Lam2019,Billing2023}. 
+Neuroimaging studies have consistently demonstrated structural and functional brain alterations in IBS patients, particularly in regions involved in visceral sensation, emotional processing, and cognitive control~\cite{Rapps2008,Ellingson2013,Labus2017}. 
+Voxel-based morphometry studies have revealed specific patterns of gray matter alterations: Seminowicz et al.~\cite{Seminowicz2010} found decreased gray matter density in the medial prefrontal cortex, ventrolateral prefrontal cortex, posterior parietal cortex, ventral striatum, and thalamus in IBS patients, with increased density in the pregenual anterior cingulate cortex and orbitofrontal cortex. 
+A recent meta-analysis of 12 morphometry studies by Zhao et al.~\cite{Zhao2023} confirmed widespread gray matter changes in IBS, including alterations in the hippocampus, amygdala, cingulate cortex, and prefrontal regions. 
+These structural findings are particularly relevant to the present study, as they highlight subcortical structures and prefrontal-limbic circuits as key neural substrates in IBS, regions that overlap substantially with the morphometric features examined here. 
+Billing et al.~\cite{Billing2023} demonstrated that cognitive impairment is common in IBS patients but only weakly correlated with depression, anxiety, and GI symptom severity, suggesting that cognitive deficits represent a distinct dimension of the disorder. 
+Although cognitive impairments have been demonstrated at the group level, these deficits appear to characterize specific subgroups rather than being a universal feature of IBS~\cite{Billing2023,LundervoldAJ2024}.
+
+
+The Rome IV criteria provide the current diagnostic framework for IBS, defining it as a disorder of gut-brain interaction (DGBI)~\cite{Lacy2016,Drossman2016}. 
+Rome IV also introduced the Multidimensional Clinical Profile (MDCP), a framework for individualizing treatment based on categorical diagnosis, clinical modifiers, severity, psychosocial factors, and physiological biomarkers~\cite{Schmulson2017}. 
+However, cognitive function, despite evidence of impairment in IBS patient~\cite{Billing2023}, is not explicitly incorporated in the MDCP framework.
+
+\textbf{Patient Similarity Networks} (PSN) represent a powerful methodology for exploring heterogeneity in clinical populations~\cite{Wang2014,Pai2018}. 
+Originating from network medicine and similarity network fusion approaches, PSN constructs graphs where each node represents a patient, while edges connect patients who are similar based on clinical or biological variables, with edge weights reflecting the degree of similarity. 
+This network-based approach enables: (1) identification of natural patient groups (communities) without predefined categories; (2) discovery of patients with high network centrality (degree, betweenness, or eigenvector centrality) who may be particularly representative of their subgroup or serve as ``bridges'' between groups; (3) identification of clinical features that drive patient similarity; and (4) relating network structure to clinical outcomes. 
+Unlike supervised classification methods that seek boundaries between predefined groups, PSN takes an unsupervised approach that lets similarity patterns emerge directly from the data. 
+This makes PSN particularly suited for heterogeneous conditions like IBS, where meaningful patient subgroups based on underlying neurobiology may cut across, rather than align with, the binary diagnostic distinction between patients and healthy controls. 
+This approach has proven valuable for patient stratification and subtype discovery in oncology~\cite{Hofree2013}, diabetes~\cite{Li2015}, and other complex conditions characterized by phenotypic diversity.
+
+PSN methodology aligns closely with the goals of precision / personalized medicine and neuropsychology~\cite{Collins2015,Schork2015,Ashley2016,LundervoldAJ2025}. 
+Rather than treating patients according to broad diagnostic categories, personalized medicine grounded on precision methodologies, seeks to tailor interventions based on individual characteristics, including genetic, environmental, and lifestyle factors~\cite{Topol2019}. 
+PSN contributes to this vision by revealing the multidimensional structure of patient populations, where individuals are positioned according to their unique profiles across multiple domains. 
+This holistic approach moves beyond single-variable analyses toward integrated, systems-level characterization~\cite{Barabasi2011,Stenzinger2023}. 
+For complex disorders like IBS, where symptoms arise from interacting physiological, psychological, and neural mechanisms, such multidimensional profiling may better capture the factors relevant to treatment response. 
+By identifying patient subgroups with distinct brain-cognition signatures, PSN can potentially inform more targeted therapeutic strategies, whether pharmacological, dietary, psychological, or multimodal, thereby advancing the translation of heterogeneity research into clinical practice~\cite{Miotto2018,Wiens2019}.
+
+This work builds upon a series of studies from the Bergen Brain-Gut Microbiota (B-BGM) project~\cite{Berentsen2020}, a multidisciplinary prospective case-control study established to investigate brain-gut-microbiota interactions in IBS. 
+The B-BGM project was designed with three primary aims: (1) to characterize brain-gut-microbiota interactions in IBS patients compared to healthy controls using multimodal neuroimaging, cognitive assessments, and microbiome profiling; (2) to evaluate the effects of a dietary intervention (low-FODMAP diet) on these interactions; and (3) to identify biomarkers that could predict treatment response. 
+The comprehensive phenotyping in B-BGM, including structural magnetic resonance imaging (MRI), cognitive testing with the Repeatable Battery for the Assessment of Neuropsychological Status (RBANS), symptom severity assessment with the IBS Severity Scoring System (IBS-SSS), and gut microbiome characterization, provides a unique dataset for investigating patient heterogeneity using network-based approaches.
+
+Recent B-BGM publications have employed machine learning to decode psychological distress and gut-brain interactions in IBS~\cite{LundervoldAJ2024} and to identify IBS patients using brain morphometry and cognitive features~\cite{Lundervold2025}. 
+The ``Decoding IBS'' study~\cite{LundervoldAJ2024} addressed the clinical observation that psychological distress, including anxiety and depression, is highly prevalent among IBS patients yet varies considerably in severity. 
+Using XGBoost and Random Forest classifiers trained on clinical and cognitive features (fatigue, sleep disturbances, depression-anxiety scores, and RBANS cognitive indices), this study demonstrated that patients with high versus low psychological distress could be distinguished with high accuracy. 
+The most discriminative features were related to fatigue, sleep quality, and specific cognitive domains. 
+Additionally, unsupervised k-means clustering identified three distinct subgroups: one largely unaffected by psychological distress (comprising most healthy controls and some IBS patients), one characterized by the lowest cognitive performance and elevated anxiety, and one marked by high levels of fatigue and depressive symptoms alongside poor sleep quality. 
+These findings demonstrated that IBS patients can be stratified into clinically meaningful subgroups based on their psychological and cognitive profiles, with direct implications for treatment stratification. 
+Subsequently, Lundervold et al. (2025)~\cite{Lundervold2025} showed that combining morphometric and cognitive measures achieved 93\% sensitivity in identifying IBS patients, with subcortical structures (particularly hippocampus and amygdala) and cognitive domains (memory, attention) being particularly important for group discrimination. 
+The present study extends this line of research by applying Patient Similarity Networks to the same dataset as Lundervold et al.~\cite{Lundervold2025}, but with a different analytical approach: rather than supervised classification, we use unsupervised network-based community detection to identify patient subgroups based on brain morphometry and cognition. 
+While the ``Decoding IBS'' study used clinical and psychological features (fatigue, sleep, anxiety, depression) alongside cognition, our PSN approach focuses exclusively on objective neurobiological measures, potentially revealing subgroup structures based on brain-cognition similarity patterns that may cut across symptom-based classifications.
+
+Specifically, we address four research questions: (1) Can PSN identify meaningful subgroups among IBS patients and healthy controls based on brain morphometry and cognitive measures? (2) Which brain and cognitive features drive similarity between patients in the network? (3) How do network properties such as centrality relate to symptom severity as measured by IBS-SSS? (4) How robust are the findings across different similarity measures and parameter choices?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Materials and Methods}
+\label{sec:methods}
+
+\subsection{Study Population and Data}
+\label{subsec:data}
+
+The dataset analyzed in this study comprises a subset of participants from the Bergen Brain-Gut Microbiota (B-BGM) project, specifically the cohort with complete brain morphometry and cognitive data as described by Lundervold et al. (2025)~\cite{Lundervold2025}. 
+The cohort comprises 78 participants, including 49 patients diagnosed with IBS and 29 healthy controls (HC). 
+All IBS patients were clinically diagnosed and fulfilled the Rome IV diagnostic criteria~\cite{Lacy2016,Drossman2016}. 
+Brain morphometry data were obtained through volumetric analysis of structural T1-weighted MR images processed with FreeSurfer version 7.4.1~\cite{Fischl2012}, a widely validated automated neuroimaging pipeline that performs cortical reconstruction, subcortical segmentation, and volumetric quantification. 
+FreeSurfer's automated segmentation provides reliable measurements of subcortical structures and cortical regions that have been shown to differ between IBS patients and healthy controls in prior morphometry studies~\cite{Seminowicz2010,Zhao2023}. 
+Cognitive function was assessed using the RBANS~\cite{Randolph1998}, which provides age-corrected index scores across five cognitive domains: Immediate Memory, Visuospatial/Constructional, Language, Attention, and Delayed Memory, plus an overall Total Scale score. 
+Clinical severity was quantified using the IBS-SSS~\cite{Francis1997}, a validated questionnaire that assesses five dimensions of IBS burden: severity of abdominal pain, frequency of abdominal pain, severity of abdominal distension, dissatisfaction with bowel habits, and interference with quality of life. 
+The IBS-SSS yields composite scores ranging from 0 to 500, with established cutoffs for mild ($<$175), moderate (175--300), and severe ($>$300) symptom burden.
+
+The morphometric variables included subcortical volumes normalized to estimated total intracranial volume (eTIV), specifically the thalamus, caudate, putamen, pallidum, hippocampus, amygdala, and nucleus accumbens for both hemispheres. 
+Additional volumetric measures comprised cerebellar white matter and cortex, five corpus callosum segments (anterior, mid-anterior, central, mid-posterior, and posterior), and total cerebral white matter and cortex volumes. 
+In total, 36 morphometric and 6 cognitive variables (the five RBANS domain indices plus the Total Scale score) were included in the network construction. 
+Since the Total Scale is derived from the five domain indices, we performed a sensitivity analysis comparing results with (42 features) and without (41 features) this composite score to assess potential redundancy; results were robust to this choice (Supplementary Table S3). 
+Importantly, the IBS-SSS score was explicitly excluded from network construction and reserved for independent clinical correlation analyses. 
+This design choice avoids circularity, as IBS-SSS is a primary diagnostic criterion that would trivially separate patients from controls; instead, our network captures patient similarity based solely on objective neuroimaging and cognitive measures, allowing IBS-SSS to serve as an independent clinical validator. 
+For detailed description of data collection, sample demographics, and imputation procedure see Lundervold et al.~\cite{Lundervold2025} and the associated code repository (\url{https://github.com/arvidl/ibs-brain}).
+
+\subsection{Data Preprocessing}
+\label{subsec:preprocessing}
+
+Prior to network construction, the data underwent several preprocessing steps to ensure meaningful similarity calculations. 
+Missing values, though minimal in this dataset, were handled through mean imputation to maintain the complete case structure required for pairwise distance calculations.
+
+All features were standardized using z-score transformation to ensure that variables with different scales contribute equally to similarity calculations. 
+This standardization is particularly important given the substantial scale differences between brain volumes measured in cubic millimeters and cognitive scores on standardized scales. 
+The transformation was applied as:
+\begin{equation}
+z_i = \frac{x_i - \mu}{\sigma}
+\end{equation}
+where $\mu$ and $\sigma$ represent the mean and standard deviation of each feature across all participants. 
+It should be noted that the RBANS scores were already standardized according to age-adjusted Scandinavian population norms (mean = 100, SD = 15)~\cite{RandolphScand2013,Lundervold2025}; the z-score transformation applied here serves to place all variables on a common scale relative to our study sample for the purpose of distance calculations.
+
+\subsection{Network Construction}
+\label{subsec:network}
+
+The construction of patient similarity networks followed a three-step procedure. 
+In the first step, pairwise distances between all participants were computed using three complementary distance metrics to assess robustness. 
+For any two participants $i$ and $j$, let $\mathbf{x}_i = (x_{i1}, x_{i2}, \ldots, x_{ip})$ denote the vector of $p = 42$ standardized feature values for participant $i$. 
+
+\textit{Euclidean distance} measures the straight-line distance between two participants in the multidimensional feature space:
+\begin{equation}
+d_{ij} = \sqrt{\sum_{k=1}^{p} (x_{ik} - x_{jk})^2}
+\end{equation}
+where the sum is taken over all $p$ features. Participants with similar brain volumes and cognitive scores will have small Euclidean distances.
+
+\textit{Cosine distance} captures how similarly two participants' feature profiles are shaped, focusing on the pattern rather than absolute values:
+\begin{equation}
+d_{ij} = 1 - \frac{\mathbf{x}_i \cdot \mathbf{x}_j}{\|\mathbf{x}_i\| \|\mathbf{x}_j\|}
+\end{equation}
+where $\mathbf{x}_i \cdot \mathbf{x}_j$ is the dot product and $\|\mathbf{x}_i\|$ is the vector length. 
+Geometrically, cosine distance measures the angle between two participants' feature vectors in $p$-dimensional space: vectors pointing in similar directions (small angle) yield low cosine distance, regardless of their lengths. 
+To illustrate: consider two participants who both show relatively larger hippocampal volumes, smaller amygdala volumes, and higher memory scores, but one has generally larger brain structures overall. 
+Euclidean distance would rate them as dissimilar due to the absolute size differences, whereas cosine distance would recognize their similar neuroanatomical-cognitive ``signature'' and rate them as similar.
+
+\textit{Correlation distance} measures dissimilarity in feature profiles based on Pearson correlation:
+\begin{equation}
+d_{ij} = 1 - \rho(\mathbf{x}_i, \mathbf{x}_j)
+\end{equation}
+where $\rho$ denotes the Pearson correlation coefficient between the two feature vectors. 
+Participants whose features co-vary similarly will have low correlation distance.
+
+In the second step, distances were transformed to similarities using a Gaussian kernel function. For each pair of participants, the similarity $s_{ij}$ was computed as:
+\begin{equation}
+s_{ij} = \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right)
+\end{equation}
+where $d_{ij}$ is the distance between participants $i$ and $j$, and $\sigma$ (the bandwidth parameter) was set to the mean pairwise distance across all participant pairs. 
+This transformation converts distances to similarities on a 0--1 scale, where values close to 1 indicate highly similar participants and values close to 0 indicate dissimilar participants.
+
+In the third step, the network was sparsified to avoid overly dense connectivity that would obscure meaningful structure. 
+Each node was connected to its $k$ nearest neighbors based on similarity scores, and edges with similarity below a specified threshold were removed. 
+The primary analysis employed $k = 8$ nearest neighbors and a similarity threshold of 0.3. 
+The choice of $k = 8$ follows the common heuristic of setting $k$ to approximately 10\% of the sample size~\cite{Pai2018}, which for our cohort of 78 participants yields $k \approx 8$. 
+This value ensures that each patient maintains a meaningful number of connections while avoiding overly dense networks that would hinder community detection. 
+The similarity threshold of 0.3 was selected to retain edges representing moderate-to-strong similarity (corresponding to distances less than approximately 1.5 standard deviations from the mean in the Gaussian kernel), filtering out weak or spurious connections. 
+Both parameter choices were validated through sensitivity analyses exploring a range of values ($k \in \{5, 8, 10, 15\}$ and thresholds $\in \{0.2, 0.3, 0.4, 0.5\}$) to assess robustness of the findings.
+
+\subsection{Community Detection}
+\label{subsec:community}
+
+Community detection was performed using the Louvain algorithm~\cite{Blondel2008}, a widely-used greedy optimization method for detecting communities in large networks. 
+The algorithm operates in two iterative phases: first, each node is assigned to its own community, then nodes are iteratively moved to neighboring communities if such moves increase the network modularity $Q$, defined as:
+\begin{equation}
+Q = \frac{1}{2m} \sum_{ij} \left[ A_{ij} - \frac{k_i k_j}{2m} \right] \delta(c_i, c_j)
+\end{equation}
+where $A_{ij}$ is the edge weight between nodes $i$ and $j$, $k_i$ and $k_j$ are their respective degrees, $m$ is the total edge weight, $c_i$ denotes the community of node $i$, and $\delta$ is the Kronecker delta. 
+Higher modularity indicates stronger community structure, with $Q > 0.3$ typically considered indicative of significant community organization. 
+In the second phase, the algorithm builds a new network where nodes represent the communities found in the first phase, and the process repeats until modularity no longer increases. 
+This hierarchical approach efficiently identifies communities at multiple scales without requiring a predefined number of clusters.
+
+Critically, the Louvain algorithm operates solely on the network topology derived from brain morphometry and cognitive features; the diagnostic labels (IBS versus HC) and IBS-SSS scores are not used during community detection. 
+This unsupervised approach allows communities to emerge naturally from patient similarity patterns, after which we can assess whether detected communities correspond to clinical groups.
+
+The correspondence between detected communities and actual diagnostic groups was evaluated using two complementary metrics. 
+The Adjusted Rand Index (ARI) measures agreement between partitions while correcting for chance, yielding values from $-1$ to $1$ where $1$ indicates perfect agreement and $0$ represents chance-level correspondence. 
+The Normalized Mutual Information (NMI) provides an information-theoretic measure of partition similarity ranging from $0$ to $1$.
+
+\subsection{Centrality Analyses}
+\label{subsec:centrality}
+
+Three centrality measures were computed to identify the most important nodes in the network. 
+Degree centrality quantifies the number of connections each node maintains, identifying highly connected patients. 
+Betweenness centrality measures how frequently a node lies on the shortest paths between other node pairs, identifying patients who serve as bridges between different parts of the network. 
+Eigenvector centrality assigns importance based on connections to other important nodes, capturing influence within the network structure. 
+These measures were compared between IBS and HC groups and correlated with IBS-SSS scores within the patient group.
+
+\subsection{Statistical Validation}
+\label{subsec:validation}
+
+Statistical validation employed both bootstrap resampling and permutation testing approaches. 
+Bootstrap confidence intervals for ARI and NMI were estimated through 1000 resamples with replacement, constructing a new network and performing community detection for each resample. 
+The 2.5th and 97.5th percentiles of the resulting distributions provided 95\% confidence intervals.
+
+Permutation testing assessed whether the observed correspondence between detected communities and diagnostic groups exceeded chance levels. 
+Group labels were randomly permuted 1000 times while maintaining the original network structure, generating null distributions for ARI and NMI. 
+The proportion of permuted values exceeding the observed values provided empirical $p$-values.
+
+\subsection{Community Statistical Comparisons}
+\label{subsec:community_stats}
+
+Statistical testing for differences between detected communities included multiple complementary approaches. 
+Network modularity was computed and compared against a null model generated by 100 random permutations of community assignments, yielding a $z$-score and empirical $p$-value. 
+Assortativity coefficient by diagnostic group was computed to quantify mixing patterns across the IBS/HC distinction.
+
+Chi-square tests evaluated whether the distribution of IBS patients and healthy controls differed significantly across communities. 
+Kruskal-Wallis tests assessed differences in continuous clinical variables (IBS-SSS, RBANS Total Scale score, age) across the four communities, with effect sizes reported as $\eta^2$. 
+For variables with significant omnibus tests, post-hoc pairwise comparisons were performed using Mann-Whitney $U$ tests with Bonferroni correction for multiple comparisons.
+
+\subsection{Feature Importance with Multiple Testing Correction}
+\label{subsec:feature_importance_methods}
+
+Feature importance was assessed through Spearman correlations between standardized feature values and degree centrality. 
+To account for the multiple comparisons across 42 features, false discovery rate (FDR) correction was applied using the Benjamini-Hochberg procedure~\cite{Benjamini1995}. 
+Features with FDR-corrected $p < 0.05$ were considered statistically significant. 
+Additionally, Mann-Whitney $U$ tests compared feature importance (absolute correlation values) between morphometric and cognitive feature categories.
+
+\subsection{Sensitivity Analysis}
+\label{subsec:sensitivity}
+
+Robustness of the findings was assessed through systematic variation of analysis parameters. 
+The three similarity measures (Euclidean, cosine, and correlation distances) were compared to evaluate metric dependence. 
+Network construction parameters were varied across a grid of $k$-nearest neighbor values (5, 8, 10, and 15) and similarity thresholds (0.2, 0.3, 0.4, and 0.5). 
+Additionally, network robustness was assessed by progressively removing 0 to 50\% of edges randomly and evaluating the stability of community detection results.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+\label{sec:results}
+
+\subsection{Network Structure}
+\label{subsec:results_network}
+
+The primary PSN constructed using Euclidean distance with $k = 8$ nearest neighbors and a similarity threshold of 0.3 yielded a connected network containing all 78 participants as nodes, linked by 469 edges. 
+The average degree was 12.03 connections per patient, and the network density was 0.156, indicating a moderately sparse structure suitable for community detection analysis. 
+Figure~\ref{fig:network}B displays the network visualization with nodes colored by diagnostic group, showing considerable mixing of IBS and HC participants.
+
+\subsection{Community Detection and Network Modularity}
+\label{subsec:results_community}
+
+The Louvain algorithm identified four communities with varying composition of IBS patients and controls (Figure~\ref{fig:network}A). 
+Community 1 contained 23 participants (15 IBS, 8 HC; 65.2\% IBS), while Community 2 was the smallest with 12 participants (9 IBS, 3 HC; 75.0\% IBS). 
+Community 3 comprised 23 participants with the most balanced composition (10 IBS, 13 HC; 43.5\% IBS), and Community 4 included 20 participants (15 IBS, 5 HC; 75.0\% IBS).
+
+The correspondence between detected communities and actual diagnostic groups was modest. 
+The ARI was 0.011 with a 95\% bootstrap confidence interval of $[-0.016, 0.102]$, indicating that the community structure does not strongly align with the IBS/HC distinction. 
+Similarly, the NMI was 0.037 with a 95\% CI of $[0.009, 0.164]$. 
+Permutation testing yielded $p = 0.212$ for ARI and $p = 0.140$ for NMI, confirming that the observed correspondence does not significantly exceed chance levels.
+
+The network exhibited significant modular structure. 
+The observed modularity ($Q$) was compared against a null model of random community assignments, yielding a $z$-score indicating that the detected communities represent meaningful groupings within the network. 
+The assortativity coefficient by diagnostic group was low, suggesting that IBS patients and healthy controls are well-mixed in the network rather than preferentially connected to others of the same diagnosis.
+
+Chi-square analysis of diagnostic group distribution across communities revealed no significant difference ($\chi^2$, df~$= 3$, $p > 0.05$), indicating that communities do not differ substantially in their IBS/HC composition despite the observed numerical variations (ranging from 43.5\% to 75.0\% IBS).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/fig1_communities.pdf}
+\caption{Patient similarity network and community structure. The PSN was constructed from 78 participants (49 IBS patients, 29 healthy controls) based on 42 features comprising brain morphometry (36 volumetric measures from FreeSurfer) and cognitive function (6 RBANS indices). Edges connect patients with high similarity based on Gaussian kernel-transformed Euclidean distances in standardized feature space ($k = 8$ nearest neighbors, similarity threshold $= 0.3$). The network contains 469 edges with an average degree of 12.03. Node size is proportional to degree centrality (number of connections). (A) Network with nodes colored by the four communities identified by the Louvain modularity optimization algorithm. Community sizes range from 12 to 23 participants, with IBS proportions varying from 43.5\% to 75.0\%. (B) Same network layout with nodes colored by actual diagnosis (IBS = red, HC = blue), showing considerable mixing of patients across the network. The Adjusted Rand Index (ARI $= 0.011$, 95\% CI [$-0.016$, $0.102$]) indicates that community structure does not significantly correspond to the IBS/HC distinction. Permutation testing confirmed this observation ($p = 0.212$), suggesting that brain morphometry and cognitive features, while capturing meaningful patient similarity, do not partition into communities aligned with diagnostic categories.}
+\label{fig:network}
+\end{figure}
+
+\subsection{Comparison of Similarity Measures}
+\label{subsec:results_similarity}
+
+Results were consistent across the three similarity measures examined (Table~\ref{tab:similarity}). 
+All metrics yielded networks with similar density and identified four communities. 
+The Euclidean-based network had the highest edge count (469), followed by cosine (418) and correlation (391) distances. 
+Community detection performance, as measured by ARI and NMI, was comparable across metrics, with ARI values ranging from $-0.017$ to $0.011$ and NMI values from $0.007$ to $0.037$. 
+This consistency supports the robustness of the findings to the choice of distance metric.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of similarity measures for PSN construction.}
+\label{tab:similarity}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Metric} & \textbf{Edges} & \textbf{Communities} & \textbf{ARI} & \textbf{NMI} \\
+\midrule
+Euclidean   & 469 & 4 & 0.011  & 0.037 \\
+Cosine      & 418 & 4 & $-$0.017 & 0.007 \\
+Correlation & 391 & 4 & 0.006  & 0.037 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Centrality Analyses}
+\label{subsec:results_centrality}
+
+Centrality measures revealed no significant differences between IBS patients and healthy controls (Table~\ref{tab:centrality}). 
+Mean degree centrality was 0.155 ($\pm 0.061$) for IBS and 0.159 ($\pm 0.058$) for HC, indicating similar connectivity patterns. 
+Betweenness and eigenvector centrality showed comparable distributions between groups.
+
+Within the IBS patient group, correlations between centrality measures and symptom severity (IBS-SSS) were weak and non-significant. 
+Degree centrality showed a Spearman correlation of $r = 0.052$ ($p = 0.72$) with IBS-SSS, while betweenness centrality yielded $r = -0.042$ ($p = 0.78$) and eigenvector centrality $r = -0.072$ ($p = 0.62$). 
+These findings suggest that network position does not strongly predict symptom severity in this cohort.
+
+\begin{table}[H]
+\centering
+\caption{Centrality measures by group (mean $\pm$ SD).}
+\label{tab:centrality}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Group} & \textbf{Degree} & \textbf{Betweenness} & \textbf{Eigenvector} \\
+\midrule
+IBS & $0.155 \pm 0.061$ & $0.015 \pm 0.018$ & $0.104 \pm 0.055$ \\
+HC  & $0.159 \pm 0.058$ & $0.018 \pm 0.015$ & $0.096 \pm 0.045$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Feature Importance}
+\label{subsec:results_features}
+
+Features driving network structure were identified through Spearman correlation between standardized feature values and degree centrality, with FDR correction applied to account for multiple comparisons across 42 features (Figure~\ref{fig:features}). 
+The top-ranked features included a mix of morphometric and cognitive measures. 
+Among morphometric features, corpus callosum segments (particularly anterior and central regions), the pallidum, and hippocampus showed the strongest associations with network centrality. 
+The Language index emerged as the most influential cognitive feature, followed by the Attention index. 
+
+While several features showed nominally significant correlations at uncorrected $p < 0.05$, no features survived FDR correction at the 0.05 threshold, reflecting the moderate effect sizes and sample size constraints. 
+The mean absolute correlation with degree centrality was similar for morphometric features (0.050) and cognitive features (0.056), and Mann-Whitney $U$ testing confirmed no significant difference between feature categories ($p > 0.05$), indicating that both feature types contribute comparably to the network structure.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/fig2_features.pdf}
+\caption{Feature contributions to network structure. (A) Top 15 features ranked by absolute Spearman correlation with degree centrality. Red bars indicate morphometric features (brain volumes); blue bars indicate cognitive features (RBANS indices). Corpus callosum segments, pallidum, and hippocampus show the strongest morphometric associations, while the Language and Attention indices are the most influential cognitive features. None of the correlations survived FDR correction, consistent with the modest sample size. (B) Mean absolute correlation with degree centrality by feature category. Morphometric features (mean $|r| = 0.050$) and cognitive features (mean $|r| = 0.056$) contribute comparably to network structure (Mann-Whitney $U$ test, $p > 0.05$), supporting the value of combining both data types in the PSN analysis.}
+\label{fig:features}
+\end{figure}
+
+\subsection{Community Clinical Profiles}
+\label{subsec:results_profiles}
+
+The four detected communities exhibited distinct clinical profiles (Table~\ref{tab:profiles}). 
+Community 4, which had the highest proportion of IBS patients (75.0\%), also showed the lowest mean RBANS Total Scale score ($84.3 \pm 10.9$), suggesting a subgroup characterized by both IBS diagnosis and lower cognitive performance. Community 2, also with 75.0\% IBS patients, had the highest mean IBS-SSS score ($240.6 \pm 140.6$), indicating more severe symptoms. 
+In contrast, Community 3, which had the lowest IBS proportion (43.5\%) and was closest to the overall sample composition, showed intermediate values for both cognitive and symptom measures.
+
+Kruskal-Wallis tests were performed to assess statistical differences in clinical variables across communities. 
+While trends were observed, particularly for RBANS Total Scale scores, the observed differences did not reach statistical significance after accounting for the modest sample sizes within each community. 
+The effect sizes ($\eta^2$) for these comparisons were small to moderate, consistent with the exploratory nature of subgroup identification in this sample. 
+Post-hoc pairwise comparisons with Bonferroni correction did not identify any community pairs with significantly different clinical profiles, suggesting that the observed numerical differences should be interpreted cautiously and require replication in larger samples.
+
+\begin{table}[H]
+\centering
+\caption{Clinical and demographic profiles of detected communities. Values are mean $\pm$ SD, reported on original measurement scales (not z-transformed). IBS-SSS = IBS Severity Scoring System (range 0--500); RBANS = Repeatable Battery for the Assessment of Neuropsychological Status Total Scale score (population mean = 100, SD = 15).}
+\label{tab:profiles}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Community} & \textbf{N} & \textbf{IBS} & \textbf{HC} & \textbf{\% IBS} & \textbf{Age} & \textbf{IBS-SSS} & \textbf{RBANS} \\
+\midrule
+1 & 23 & 15 & 8  & 65.2 & $43.7 \pm 10.1$ & $179.3 \pm 128.4$ & $101.8 \pm 13.4$ \\
+2 & 12 & 9  & 3  & 75.0 & $27.7 \pm 8.3$  & $240.6 \pm 140.6$ & $92.0 \pm 15.8$ \\
+3 & 23 & 10 & 13 & 43.5 & $32.5 \pm 11.9$ & $134.1 \pm 135.1$ & $99.5 \pm 9.8$ \\
+4 & 20 & 15 & 5  & 75.0 & $33.8 \pm 8.3$  & $208.8 \pm 123.8$ & $84.3 \pm 10.9$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Community profiles revealed notable patterns beyond the diagnostic composition (Table~\ref{tab:profiles}). 
+\textbf{Community 1} comprised the oldest participants (approximately 11--16 years older than the other communities) with moderate symptom severity and the highest cognitive scores, slightly above the population mean. 
+\textbf{Community 2}, the smallest community, showed the most severe symptoms (moderate-to-severe range) and was notably the youngest, with below-average cognitive scores. \textbf{Community 3} had the most balanced IBS/HC composition and the lowest symptom severity (mild range), with cognitive performance close to the population mean. \textbf{Community 4} exhibited the lowest cognitive scores (approximately one standard deviation below the population mean), suggesting a subgroup characterized by cognitive impairment alongside high IBS prevalence and moderate-to-severe symptoms. These patterns suggest that communities are differentiated not only by brain-cognition similarity but also by clinically meaningful characteristics including age, symptom burden, and cognitive function.
+
+To further characterize the brain-cognition profiles distinguishing each community, we computed mean z-scores for all 42 features within each community (Table~\ref{tab:feature_profiles}). 
+\textbf{Community 1} (oldest, preserved cognition) showed the largest estimated intracranial volume and elevated cognitive scores, but markedly reduced gray matter volumes, suggesting preserved cognitive function despite smaller brain tissue volumes relative to intracranial capacity. 
+\textbf{Community 2} (youngest, most severe IBS symptoms) exhibited elevated bilateral cortical volumes but substantially reduced white matter and corpus callosum volumes, potentially reflecting a developmental pattern with robust cortical gray matter but less white matter integrity. 
+Notably, Community 2's most distinguishing features were exclusively morphometric, suggesting that this young, high-symptom subgroup is characterized primarily by brain structural patterns rather than cognitive differences. 
+\textbf{Community 3} (most balanced IBS/HC ratio, mildest symptoms) showed the largest subcortical gray matter volumes with particularly elevated basal ganglia structures, alongside the smallest intracranial volumes. 
+\textbf{Community 4} (lowest cognitive scores) displayed reduced performance across multiple cognitive domains alongside elevated corpus callosum and putamen volumes, demonstrating that larger white matter structures do not necessarily correspond to better cognitive performance. 
+These feature profiles suggest that communities capture distinct neurobiological phenotypes characterized by different patterns of brain structure-cognition relationships, which may have implications for understanding IBS heterogeneity and potentially for tailoring interventions.
+
+\begin{table}[H]
+\centering
+\caption{Distinguishing features of detected communities. Mean Z = average standardized score for that feature within the community, computed from z-score transformed data (mean = 0, SD = 1 across all participants). Positive values indicate the community average is elevated relative to the overall sample mean; negative values indicate it is reduced. M = Morphometric; C = Cognitive. For each community, features were selected by ranking all 42 features by mean z-score and displaying the three most elevated (highest positive z-scores) and three most reduced (most negative z-scores). Note that Community 2 contains only morphometric features, indicating that its distinguishing characteristics are primarily structural rather than cognitive.}
+\label{tab:feature_profiles}
+\begin{tabular}{clcc}
+\toprule
+\textbf{Community} & \textbf{Feature} & \textbf{Type} & \textbf{Mean Z} \\
+\midrule
+\multirow{6}{*}{1 (n=23)} 
+  & eTIV & M & $+0.61$ \\
+  & Total Scale (RBANS) & C & $+0.48$ \\
+  & Visuospatial Index & C & $+0.41$ \\
+  & Subcortical Gray Vol & M & $-1.14$ \\
+  & Total Gray Vol & M & $-1.12$ \\
+  & Cortex Vol & M & $-1.07$ \\
+\midrule
+\multirow{6}{*}{2 (n=12)} 
+  & Left Cortex Vol & M & $+0.72$ \\
+  & Cortex Vol & M & $+0.70$ \\
+  & Right Cortex Vol & M & $+0.68$ \\
+  & Right Cerebral WM Vol & M & $-0.89$ \\
+  & Cerebral WM Vol & M & $-0.89$ \\
+  & CC Anterior & M & $-0.78$ \\
+\midrule
+\multirow{6}{*}{3 (n=23)} 
+  & Subcortical Gray Vol & M & $+1.08$ \\
+  & Left Pallidum & M & $+0.98$ \\
+  & Right Pallidum & M & $+0.93$ \\
+  & eTIV & M & $-0.38$ \\
+  & Language Index & C & $-0.12$ \\
+  & CSF & M & $+0.07$ \\
+\midrule
+\multirow{6}{*}{4 (n=20)} 
+  & CC Mid Anterior & M & $+0.56$ \\
+  & CC Posterior & M & $+0.53$ \\
+  & Right Putamen & M & $+0.50$ \\
+  & Total Scale (RBANS) & C & $-0.78$ \\
+  & Visuospatial Index & C & $-0.62$ \\
+  & Immediate Memory Index & C & $-0.53$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Network Robustness to Edge Removal}
+\label{subsec:results_robustness}
+
+Network robustness was assessed by progressively removing up to 45\% of edges randomly and re-running community detection (Figure~\ref{fig:robustness}). 
+The ARI values fluctuated considerably under perturbation, ranging from approximately $-0.010$ to $+0.025$, with no systematic trend relative to the original ARI of $0.011$. 
+This instability indicates that the modest community-diagnosis correspondence observed in the primary analysis likely reflects chance variation rather than true structure. 
+In contrast, network connectivity remained stable throughout, with the network maintaining a single connected component even at 45\% edge removal. 
+This dissociation (unstable community assignments but robust network topology) suggests that while patients are reliably connected based on their brain-cognition profiles, the grouping of these connections into communities does not capture a meaningful diagnostic distinction.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/fig3_robustness.pdf}
+\caption{Network robustness to edge removal. (A) Adjusted Rand Index (ARI) values as edges are progressively removed from 0\% to 45\%. The dashed red line indicates the original ARI (0.011). The high variability ranging from approximately $-0.010$ to $+0.025$ with no systematic trend suggests that the modest community-diagnosis correspondence reflects chance variation rather than true structure. (B) Number of connected components in the network under edge removal. The network maintains a single connected component throughout, demonstrating that the underlying network topology based on brain-cognition similarity is robust even when community assignments are unstable. This dissociation indicates that patients are reliably connected based on their multivariate profiles, but these connections do not partition into communities that align with diagnostic categories.}
+\label{fig:robustness}
+\end{figure}
+
+\newpage
+\subsection{Graphical Summary}
+\label{subsec:results_summary}
+
+Figure~\ref{fig:summary} provides a graphical overview of the main findings from this PSN analysis.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/fig4_summary.pdf}
+\caption{Graphical summary of the Patient Similarity Network analysis. (A) The PSN with nodes colored by diagnostic group (IBS = red, HC = blue), showing the mixing of patients across the network. (B) The same network with nodes colored by the four detected communities, illustrating how the Louvain algorithm partitions patients based on brain-cognition similarity rather than diagnosis. (C) Top 10 features contributing to network structure, with morphometric features (red, n=8) and cognitive features (blue, n=2) both represented: corpus callosum segments, subcortical structures (pallidum, thalamus, hippocampus), and cognitive indices (Language, Visuospatial). (D) Key quantitative findings: the network comprises 78 nodes and 469 edges; community detection yielded an ARI of 0.011 with 95\% confidence interval spanning zero; permutation testing confirmed non-significant correspondence with diagnosis ($p = 0.212$); and results were consistent across similarity measures and robust to network perturbation. Each detected community exhibited distinct brain-cognition feature profiles (Table~\ref{tab:feature_profiles}), with differences in corpus callosum volumes, subcortical structures, and cognitive indices (particularly Visuospatial and memory domains) characterizing the subgroups.}
+\label{fig:summary}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+
+Irritable Bowel Syndrome presents a significant challenge for precision medicine due to its heterogeneous clinical presentation and the complex interplay between gastrointestinal symptoms, brain structure, and cognitive function. 
+Traditional diagnostic approaches classify patients based on symptom criteria (Rome IV) and severity scores (IBS-SSS), yet these categories may not capture the underlying neurobiological diversity that could inform personalized treatment strategies. 
+This study was motivated by the need for data-driven approaches that can reveal natural patient groupings based on objective biological and cognitive measures, independent of symptom-based classification.
+
+We employed Patient Similarity Networks to investigate whether brain morphometry and cognitive features partition patients in ways that align with, or transcend, clinical diagnostic boundaries. 
+This unsupervised approach allows patient subgroups to emerge from similarity structure rather than predefined categories.
+
+The present study uses exactly the same dataset and feature set as Lundervold et al.~\cite{Lundervold2025}, enabling direct methodological comparison. 
+That study applied supervised machine learning (XGBoost, Random Forest) to classify IBS patients versus healthy controls, achieving 93\% sensitivity by optimizing decision boundaries that maximally separate the two groups. 
+In contrast, our PSN approach asks a fundamentally different question: rather than ``can we distinguish IBS from HC?'', we ask ``how do patients naturally cluster based on their brain-cognition profiles, and do these clusters correspond to diagnostic categories?'' Supervised ML learns discriminative features that differ between groups; PSN reveals similarity structure across the entire cohort without regard to labels. 
+These complementary perspectives (one optimized for classification, the other for structure discovery) together provide a more complete picture of patient heterogeneity than either approach alone.
+
+Our analytical pipeline proceeded in four stages: (1) network construction from 42 features (36 morphometric, 6 cognitive) using Gaussian kernel-transformed Euclidean distances; (2) community detection via Louvain modularity optimization to identify patient subgroups; (3) centrality analysis to identify influential patients and features; and (4) independent validation against clinical measures (IBS-SSS) that were deliberately excluded from network construction to avoid circularity. 
+
+\subsection{Main Findings}
+
+The PSN approach yielded four communities that did not correspond to diagnostic groups (ARI near zero, permutation $p = 0.212$), yet each exhibited distinct brain-cognition profiles (Table~\ref{tab:feature_profiles}). 
+Communities differed systematically in age, symptom severity, cognitive performance, and brain structural patterns. 
+The relationship between brain structure and cognition varied across communities: some showed preserved cognition despite reduced brain volumes, while others displayed the opposite pattern. 
+Notably, Community 2 (youngest, most severe symptoms) was distinguished exclusively by morphometric features, suggesting that symptom severity in this subgroup may be driven by brain structural differences rather than cognitive impairment.
+
+This result is consistent with the heterogeneous nature of IBS as a clinical syndrome. 
+The disorder encompasses patients with diverse symptom profiles, varying degrees of cognitive involvement~\cite{Lam2019,Billing2023}, and likely different underlying pathophysiological mechanisms~\cite{Ford2020,Drossman2016}. 
+A network constructed from morphometric and cognitive features would be expected to reflect this heterogeneity rather than reproduce a binary diagnostic distinction. 
+Indeed, contemporary conceptualizations of IBS emphasize that it represents a spectrum of disorders unified by symptom-based criteria rather than a single pathophysiological entity~\cite{Chey2015,Black2020}.
+
+\subsection{Relation to Prior Research}
+
+Our findings complement and extend the machine learning approaches developed within the B-BGM project. 
+Lundervold et al.~\cite{Lundervold2025} achieved 93\% sensitivity for IBS classification using XGBoost and Random Forest classifiers with the same feature set, while a companion study~\cite{LundervoldAJ2024} successfully decoded psychological distress using similar machine learning methodology (see also~\cite{LundervoldAJ2023} regarding assessment of self-reported executive function in IBS using a machine learning framework). 
+The apparent discrepancy between high classification accuracy and low community-diagnosis correspondence reflects the fundamental difference between supervised and unsupervised approaches. 
+Supervised classifiers are optimized to find discriminative boundaries between groups, whereas unsupervised community detection identifies natural clusters based on overall similarity patterns without regard to group labels. 
+This distinction has been noted in other applications of PSN to clinical populations~\cite{Li2015,Hofree2013}.
+
+The convergent evidence regarding feature importance between the machine learning analysis~\cite{Lundervold2025} and our PSN centrality correlations is noteworthy. 
+Both approaches highlight subcortical structures, particularly the hippocampus, as influential features. 
+This aligns with a growing body of neuroimaging research demonstrating structural and functional alterations in limbic regions among IBS patients~\cite{Ellingson2013,Irimia2015,Hubbard2015}. 
+The hippocampus, in particular, has been implicated in stress-related modulation of visceral pain processing and emotional regulation in IBS~\cite{Icenhour2017,Kano2020}. 
+Similarly, cognitive domains emerged as important in both analyses, consistent with reports of cognitive involvement in disorders of gut-brain interaction~\cite{Kennedy2014}. 
+Notably, Billing et al.~\cite{Billing2023} found that cognitive impairment in IBS is only weakly correlated with anxiety/depression and GI symptoms, suggesting that cognition represents an independent dimension of the disorder that may contribute to the subgroup structure observed in our network analysis.
+
+The brain-gut axis framework provides important context for interpreting these findings. 
+Mayer et al.~\cite{MayerSystems2015} articulated a systems view of IBS emphasizing that the disorder arises from dysregulated brain-gut-microbiome interactions, advocating for analytical approaches that capture this complexity. 
+Bidirectional communication between the central nervous system and the gastrointestinal tract involves neural, hormonal, and immune pathways~\cite{Mayer2015,Mayer2022}. 
+Neuroimaging studies have consistently demonstrated altered brain structure and function in IBS, particularly in regions involved in visceral sensation, emotional processing, and cognitive control~\cite{Rapps2008,Tillisch2013,Labus2017}. 
+The 12-year prospective study by Koloski et al.~\cite{Koloski2012} provided compelling evidence for bidirectional brain-gut pathways, showing that psychological distress predicts subsequent GI symptoms and vice versa. 
+Our PSN results, by identifying communities that blend IBS and HC participants based on brain-cognition profiles, may reflect these shared neural substrates: rather than forming distinct clusters, IBS patients and healthy controls exhibit overlapping brain-cognition patterns. 
+
+Together, the supervised classification results from Lundervold et al.~\cite{Lundervold2025} and our unsupervised PSN analysis provide a more complete picture: high classification accuracy demonstrates that IBS patients do differ from controls on average, while the mixing of groups within PSN communities reveals substantial overlap in brain-cognition profiles at the individual level.
+
+\subsection{Clinical Implications}
+
+Current treatment guidelines for IBS, including those from NICE~\cite{NICE2017} and the Rome Foundation, recommend a stepwise approach applicable to all patients with DGBI. 
+This approach progresses from patient education and dietary adjustments, through structured interventions such as the FODMAP diet and symptom-directed pharmacotherapy, to central neuromodulators~\cite{Hanna-Jairala2024} and psychological interventions for severe or refractory cases. 
+The Rome Foundation's Multidimensional Clinical Profile~\cite{Schmulson2017} provides a framework for individualizing treatment based on diagnosis, symptom subtype, quality of life impact, psychological comorbidities, and physiological disturbances~\cite{Drossman2016}.
+
+The present findings suggest that this severity-based model does not capture the heterogeneity within IBS populations. 
+All patients in this study had moderate-to-severe IBS at baseline, meaning that even Community 3, characterized by the "mildest" symptoms, still represents at least a moderate symptom burden. 
+Yet our PSN analysis revealed four communities with markedly different brain-cognition profiles. 
+Notably, Community 2 and Community 4 both showed high IBS prevalence and substantial symptom severity, 
+but exhibited distinct neurobiological signatures where Community 2 was characterized by reduced white matter with preserved cognition, 
+and Community 4 displayed cognitive impairment across multiple domains. 
+These findings demonstrate that "severe IBS" is not homogeneous from a neurobiological perspective.
+
+Cognitive function is not explicitly included in the MDCP framework, despite evidence that cognitive impairment is common in IBS and only weakly correlated with anxiety, depression, and GI symptom severity~\cite{Billing2023}. 
+The identification of a subgroup with pronounced cognitive difficulties raises the hypothesis that such patients might benefit from earlier introduction of interventions with demonstrated cognitive effects in IBS, 
+such as cognitive behavioral therapy or gut-directed hypnotherapy~\cite{Black2020,Lackner2018}, rather than reserving these for refractory cases.
+
+Several limitations preclude clinical application. The modest community sizes, non-significant statistical tests after correction, 
+and instability of community assignments under perturbation indicate that these patterns require replication. 
+Moreover, the cross-sectional design cannot establish the nature of the observed differences. 
+The distinct profiles could represent pre-existing traits conferring vulnerability to IBS, acquired consequences of living with chronic DGBI, 
+or downstream effects of shared underlying factors such as genetics, early life adversity, or microbiome composition. 
+Distinguishing between these possibilities requires longitudinal studies. 
+
+These findings suggest that neurobiological subtyping based on brain morphometry and cognition could meaningfully complement symptom-based severity grading in IBS, revealing heterogeneity that current frameworks obscure. 
+However, before clinical translation, prospective studies are needed to determine whether these neurobiologically-defined subgroups respond differently to targeted interventions.
+
+\subsection{Strengths and Limitations}
+
+This study has several notable methodological strengths that merit consideration in the context of the broader PSN literature. 
+The use of multiple similarity measures (Euclidean, cosine, and correlation distances) demonstrated robustness of the network structure to methodological choices, addressing the known issue that network construction results can vary substantially depending on the similarity metric used~\cite{Wang2014}. 
+Unlike many PSN applications that rely on a single distance metric, our multi-metric approach provides stronger evidence that observed patterns are not artifacts of the similarity measure chosen.
+
+Rigorous statistical validation through bootstrap confidence intervals and permutation testing provided appropriate uncertainty quantification, a feature often lacking in PSN studies. 
+The bootstrap approach accounts for sampling variability, while permutation testing addresses the multiple comparisons inherent in community detection~\cite{Pai2018}. 
+The comparison with established machine learning methods from the same dataset enabled meaningful methodological synthesis, demonstrating both convergent and complementary insights from supervised and unsupervised approaches.
+
+The combination of brain morphometry with cognitive measures leverages complementary information sources relevant to the gut-brain axis, extending beyond purely imaging-based or symptom-based approaches. 
+This multimodal feature set, while limited compared to studies incorporating genetics, microbiome, or metabolomics~\cite{Labus2017,Quigley2018}, provides a clinically accessible foundation for patient characterization.
+
+Several limitations should be acknowledged. 
+The sample size of 78 participants is comparable to many neuroimaging studies of IBS~\cite{Icenhour2017,Kano2020,Bhatt2022}, but limits statistical power for subgroup analyses and may not fully capture the heterogeneity present in the broader IBS population. 
+This power limitation was evident in our statistical testing: while trends in clinical variables (IBS-SSS, RBANS) across communities were observed, formal statistical tests (Kruskal-Wallis, chi-square) did not reach significance, and no features survived FDR correction for multiple testing. 
+PSN studies in oncology and diabetes have typically employed larger cohorts (hundreds to thousands of patients)~\cite{Li2015,Hofree2013}, enabling finer-grained subtyping that may require similar sample sizes in future IBS applications.
+
+The cross-sectional design precludes assessment of temporal dynamics or trajectory-based patient groupings. 
+Longitudinal studies have proven valuable in IBS research~\cite{Koloski2012,Bhatt2022}, and temporal PSN approaches could reveal dynamic patterns of patient similarity over time. 
+As a single-site study using data from the B-BGM project, replication in independent cohorts from different populations and healthcare settings would strengthen generalizability.
+
+Community detection methods involve inherent parameter choices (algorithm, resolution parameter) that can influence results. 
+While the Louvain algorithm is widely used and computationally efficient~\cite{Blondel2008}, alternative methods such as spectral clustering or stochastic block models might yield different partitions. 
+Our sensitivity analyses across parameter settings suggest reasonable stability, but the identified communities should be interpreted as one plausible partitioning among several consistent with the data.
+
+\subsection{Future Perspectives}
+
+Several promising directions merit future investigation to extend the PSN approach for IBS and related gut-brain disorders.
+
+\textbf{Longitudinal and dynamic networks.} Tracking patient trajectories over time through longitudinal PSN analysis could identify patients who transition between communities, characterize stable versus dynamic phenotypes, and relate network position changes to clinical outcomes. 
+Such approaches have proven valuable in other chronic conditions~\cite{Li2015} and would leverage the longitudinal design available in studies like the B-BGM project.
+
+\textbf{Multi-modal data integration.} Integration with gut microbiome data, which was collected as part of the B-BGM project protocol~\cite{Berentsen2020}, could enable multi-modal networks capturing the full spectrum of gut-brain interactions~\cite{Labus2017,Quigley2018}. 
+Similarity Network Fusion (SNF) and related methods~\cite{Wang2014} provide principled approaches for combining heterogeneous data types into unified patient networks. 
+Including genetic, metabolomic, and dietary information would further enrich patient characterization and align with the multi-omic paradigm in precision medicine~\cite{Collins2015,Ashley2016}.
+
+\textbf{Artificial intelligence and deep learning extensions.} The intersection of network science and artificial intelligence offers exciting opportunities for advancing PSN methodology. 
+Graph neural networks (GNNs) can learn patient representations directly from network structure, potentially capturing complex patterns missed by traditional community detection~\cite{Zitnik2018}. 
+Deep learning approaches have shown promise in medical imaging and clinical prediction~\cite{Topol2019,Miotto2018}, and their integration with network-based patient modeling could enhance both representation learning and outcome prediction. 
+Attention mechanisms could identify which patient-patient relationships are most informative for clinical outcomes, providing interpretable insights alongside predictive power.
+
+\textbf{Clinical decision support and personalized medicine.} Development of PSN-based clinical decision support tools could translate network insights into practical applications for patient stratification and treatment selection. 
+Network position metrics could serve as biomarkers for prognosis or treatment response, complementing symptom-based assessment~\cite{Schork2015}. 
+The goal of matching individual patients to optimal treatments, a cornerstone of precision medicine~\cite{Collins2015,Rajkomar2019}, may be advanced by understanding how patients cluster in multivariate feature space rather than relying solely on categorical diagnoses.
+
+\textbf{Network medicine and disease module identification.} Integration with protein-protein interaction networks and disease modules~\cite{Barabasi2011,Menche2015,Goh2007} could connect patient-level networks to molecular mechanisms.
+This multi-scale approach, linking molecular networks to patient networks, represents a frontier in network medicine with potential to bridge mechanistic understanding and clinical phenotyping.
+
+\textbf{Validation and clinical translation.} Rigorous validation in larger, independent IBS cohorts remains essential before clinical translation. 
+Prospective studies testing whether network-derived subgroups predict treatment response would provide the strongest evidence for clinical utility. 
+International collaborations pooling data across centers would enhance sample sizes and address generalizability. 
+Ultimately, demonstrating that PSN-based stratification improves patient outcomes compared to standard care will be necessary for adoption in clinical practice~\cite{Wiens2019}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+
+This study demonstrates the utility of Patient Similarity Networks for investigating heterogeneity in Irritable Bowel Syndrome based on brain morphometry and cognitive features. 
+While detected communities did not significantly align with diagnostic categories, they revealed clinically relevant subgroups with distinct symptom severity and cognitive profiles. 
+The consistency of results across similarity measures and the convergence with prior machine learning findings support the robustness and relevance of the network-based approach. 
+The PSN methodology offers unique insights into patient relationships and heterogeneity that complement traditional classification approaches, providing a foundation for future work on patient stratification and personalized management of this complex, heterogeneous gut-brain disorder.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{6pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Optional sections
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\supplementary{The following supporting information is available online: \textbf{Table S1}: Complete feature importance rankings for all 42 features; \textbf{Table S2}: Sensitivity analysis results across parameter combinations ($k \in \{5, 8, 10, 15\}$, threshold $\in \{0.2, 0.3, 0.4, 0.5\}$); \textbf{Table S3}: RBANS Total Scale sensitivity analysis comparing results with and without the composite cognitive score; \textbf{Figure S1}: Heatmap of community feature profiles showing mean z-scores for top 20 most variable features across communities.}
+
+\authorcontributions{Conceptualization, A.L. and A.J.L.; methodology, A.L.; software, A.L.; 
+investigation, A.L., J.B., B.B. and A.J.L.; resources, A.L., B.B.  A.J.L.; 
+data curation, A.L., B.B. and A.J.L.; writing: original draft preparation, A.L.; 
+writing: review and editing, A.L., J.B., B.B. and A.J.L.;
+visualization, A.L.; supervision, A.L, B.B. and A.J.L.; project administration, A.L., B.B.  and A.J.L.;
+funding acquisition, A.L., B.B. and A.J.L. All authors have read and agreed to the published version of the manuscript.}
+
+\funding{The original data collection (B-BGM project) was funded by the Research Council of Norway (grant ID FRIMED-BIO276010), Helse Vest's Research Funding (grant ID HV912243), the Trond Mohn Research Foundation (grant number BFS2018TMT0), and by The Research Council of Norway (project number 294594).}
+
+\institutionalreview{The Bergen Brain-Gut Microbiota (B-BGM) project was approved by the Southeast Regional Ethical Committees (REC) for medical and health research ethics in Norway (\url{https://rekportalen.no}, \#2015/1621, 21 September 2015). All participants provided written consent to participate, and the project was conducted following the ethical requirements set out in the Declaration of Helsinki. The project is registered at \url{www.clinicaltrials.gov} (\#NCT04296552).}
+
+\informedconsent{The consent form for participation was distributed to all
+participants and signed informed consent was obtained from all subjects involved in the study.}
+
+\dataavailability{The complete analysis workflow is publicly available at \url{https://github.com/arvidl/psn-ibs}, comprising reproducible Jupyter notebooks containing all analysis code and visualizations, the cleaned dataset in CSV format, Conda environment configuration for exact replication, and source code for generating all tables and figures. The computational analyses were developed with assistance from Claude Opus 4.5 (Anthropic, San Francisco, CA, USA) integrated within Cursor (Anysphere Inc., San Francisco, CA, USA).}
+
+\acknowledgments{We sincerely thank all patients and healthy volunteers for their participation in the Bergen Brain-Gut Microbiota (B-BGM) project. We acknowledge the contributions of both current and former B-BGM project members. In particular, we thank our coauthors in Lundervold et al.~\cite{Lundervold2025}, making this computational study possible.
+
+\textbf{Use of AI Tools:} During the preparation of this manuscript, the authors used Claude (Anthropic, Claude Opus 4.5) for assistance with (1) improving language clarity and scientific writing style, and (2) developing and refining Python code (Cursor 2.2.20 IDE) for the Patient Similarity Network analysis, including statistical testing, visualization, and figure generation. The authors have reviewed and edited all AI-generated output and take full responsibility for the content of this publication.}
+
+\conflictsofinterest{The authors declare no conflict of interest.}
+
+\newpage
+\noindent\textbf{Abbreviations}
+
+\vspace{6pt}
+\noindent The following abbreviations and terms are used in this manuscript:
+
+\vspace{6pt}
+\noindent{\small
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}@{}>{\raggedright\arraybackslash}p{3.5cm}p{10.0cm}@{}}
+\textbf{Adjacency matrix} & Matrix representation of network connections \\[2pt]
+\textbf{ARI} & Adjusted Rand Index, clustering agreement measure adjusted for chance \\[2pt]
+\textbf{B-BGM} & Bergen Brain-Gut Microbiota project \\[2pt]
+\textbf{Betweenness centrality} & Measure of how often a node lies on shortest paths between other nodes \\[2pt]
+\textbf{Bootstrap} & Resampling method for estimating confidence intervals \\[2pt]
+\textbf{CBT} & Cognitive Behavioral Therapy \\[2pt]
+\textbf{CC} & Corpus Callosum \\[2pt]
+\textbf{CI} & Confidence Interval \\[2pt]
+\textbf{Community} & Group of nodes more densely connected to each other than to the rest of the network \\[2pt]
+\textbf{Degree centrality} & Normalized measure of node connectivity \\[2pt]
+\textbf{DGBI} & Disorder of Gut-Brain Interaction \\[2pt]
+\textbf{Edge} & Connection between two nodes representing patient similarity \\[2pt]
+\textbf{Eigenvector centrality} & Node importance based on connections to other important nodes \\[2pt]
+\textbf{eTIV} & Estimated total intracranial volume \\[2pt]
+\textbf{FDR} & False Discovery Rate, correction for multiple testing \\[2pt]
+\textbf{FODMAP} & Fermentable Oligosaccharides, Disaccharides, Monosaccharides, and Polyols \\[2pt]
+\textbf{FreeSurfer} & Neuroimaging software for brain segmentation and volumetric analysis \\[2pt]
+\textbf{Gaussian kernel} & Function transforming distances to similarities \\[2pt]
+\textbf{GI} & Gastrointestinal \\[2pt]
+\textbf{Graph/Network} & Mathematical structure of nodes connected by edges \\[2pt]
+\textbf{HC} & Healthy Controls \\[2pt]
+\textbf{IBS} & Irritable Bowel Syndrome \\[2pt]
+\textbf{IBS-C/-D/-M} & IBS subtypes: constipation-predominant, diarrhea-predominant, mixed \\[2pt]
+\textbf{IBS-SSS} & IBS Severity Scoring System (range 0--500) \\[2pt]
+\textbf{k-NN} & k-nearest neighbors, network construction method \\[2pt]
+\textbf{Louvain algorithm} & Greedy algorithm for community detection via modularity maximization \\[2pt]
+\textbf{MDCP} & The Rome Foundation's Multidimensional Clinical Profile \\[2pt]
+\textbf{MRI} & Magnetic Resonance Imaging \\[2pt]
+\textbf{Modularity (Q)} & Measure of network partition quality \\[2pt]
+\textbf{Network density} & Proportion of possible edges present in the network \\[2pt]
+\textbf{Network sparsification} & Process of removing weak edges \\[2pt]
+\textbf{NICE} & National Institute for Health and Care Excellence \\[2pt]
+\textbf{NMI} & Normalized Mutual Information, clustering similarity measure \\[2pt]
+\textbf{Node} & Vertex in the network representing an individual patient \\[2pt]
+\textbf{Node degree} & Number of edges connected to a node \\[2pt]
+\textbf{Permutation test} & Non-parametric method using random label shuffling \\[2pt]
+\textbf{PSN} & Patient Similarity Network \\[2pt]
+\textbf{RBANS} & Repeatable Battery for the Assessment of Neuropsychological Status \\[2pt]
+\textbf{SD} & Standard Deviation \\[2pt]
+\textbf{Similarity matrix} & Matrix containing pairwise similarity values between patients \\[2pt]
+\textbf{Similarity threshold} & Minimum similarity for edge inclusion \\[2pt]
+\textbf{SNF} & Similarity Network Fusion \\[2pt]
+\textbf{Weighted edge} & Edge with numerical value representing similarity strength \\
+\end{tabular*}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% References
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\begin{adjustwidth}{-\extralength}{0cm}
+
+\reftitle{References}
+
+\bibliography{references}
+
+\end{adjustwidth}
+
+\end{document}
