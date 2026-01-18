@@ -251,5 +251,5 @@ Email: arvid.lundervold@uib.no
 ---
 
 <p align="center">
-  <i>Exploring the heterogeneity of gut-brain disorders through network science</i>
+  <i>Exploring the heterogeneity of gut-brain disorders through network science (Updated: 2026-01-18)</i>
 </p>
