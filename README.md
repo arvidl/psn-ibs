@@ -5,7 +5,8 @@
 
 **Data and code accompanying:**
 
-> *Patient Similarity Networks for Irritable Bowel Syndrome: Revisiting Brain Morphometry and Cognitive Features* <br>(to appear in *Diagnostics* [[preprint](https://www.preprints.org/frontend/manuscript/941d338237a10d3336c6d9a90757b5ad/download_pub)])
+> *Patient Similarity Networks for Irritable Bowel Syndrome: Revisiting Brain Morphometry and Cognitive Features* <br>
+*Diagnostics* 2026, 16(2), 357 [[link](https://www.mdpi.com/2075-4418/16/2/357)] [[preprint](https://www.preprints.org/frontend/manuscript/941d338237a10d3336c6d9a90757b5ad/download_pub)])
 
 This project applies **Patient Similarity Networks (PSN)** to investigate heterogeneity in Irritable Bowel Syndrome (IBS) using brain morphometry and cognitive measures, complementing the machine learning approach presented in [Lundervold et al. (2025)](https://doi.org/10.3390/diagnostics15040470).
 
@@ -179,14 +180,16 @@ The dataset includes **78 participants** (49 IBS patients, 29 healthy controls) 
 If you use this code or data, please cite:
 
 ```bibtex
-@article{Lundervold2025psn,
-  author    = {Lundervold, Arvid and Billing, Julie and Berentsen, Birgitte 
-               and Lundervold, Astri J.},
-  title     = {Patient Similarity Networks for Irritable Bowel Syndrome: 
-               Revisiting Brain Morphometry and Cognitive Features},
-  journal   = {Diagnostics},
-  year      = {2025},
-  note      = {Submitted}
+@article{Lundervold2026psn,
+AUTHOR = {Lundervold, Arvid and Billing, Julie and Berentsen, Birgitte and Lundervold, Astri J.},
+TITLE = {Patient Similarity Networks for Irritable Bowel Syndrome: Revisiting Brain Morphometry and Cognitive Features},
+JOURNAL = {Diagnostics},
+VOLUME = {16},
+YEAR = {2026},
+NUMBER = {2},
+ARTICLE-NUMBER = {357},
+URL = {https://www.mdpi.com/2075-4418/16/2/357},
+ISSN = {2075-4418}
 }
 ```
 
@@ -251,5 +254,5 @@ Email: arvid.lundervold@uib.no
 ---
 
 <p align="center">
-  <i>Exploring the heterogeneity of gut-brain disorders through network science (Updated: 2026-01-18)</i>
+  <i>Exploring the heterogeneity of gut-brain disorders through network science (Updated: 2026-01-22)</i>
 </p>
