@@ -6,7 +6,7 @@
 **Data and code accompanying:**
 
 > *Patient Similarity Networks for Irritable Bowel Syndrome: Revisiting Brain Morphometry and Cognitive Features* <br>
-*Diagnostics* 2026, 16(2), 357 [[link](https://www.mdpi.com/2075-4418/16/2/357)] [[preprint](https://www.preprints.org/frontend/manuscript/941d338237a10d3336c6d9a90757b5ad/download_pub)])
+published in *Diagnostics* 2026, 16(2), 357 [[link](https://www.mdpi.com/2075-4418/16/2/357)] [[preprint](https://www.preprints.org/frontend/manuscript/941d338237a10d3336c6d9a90757b5ad/download_pub)]
 
 This project applies **Patient Similarity Networks (PSN)** to investigate heterogeneity in Irritable Bowel Syndrome (IBS) using brain morphometry and cognitive measures, complementing the machine learning approach presented in [Lundervold et al. (2025)](https://doi.org/10.3390/diagnostics15040470).
 
